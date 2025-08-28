@@ -102,7 +102,7 @@ const HomePage = () => {
 
   // Utiliser useCallback pour éviter la recréation de la fonction
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % 3);
+    setCurrentSlide((prev) => (prev + 1) % 5);
   }, []);
 
   useEffect(() => {
@@ -159,6 +159,36 @@ const HomePage = () => {
         { label: "Interventions/mois", value: "500+" },
         { label: "Satisfaction", value: "98%" }
       ]
+    },
+    {
+      title: "Innovation Technologique",
+      subtitle: "Solutions intelligentes et connectées",
+      description: "Domotique • IoT • Systèmes automatisés • Énergie renouvelable • Smart Building",
+      cta: "Explorer l'innovation",
+      bgColor: "from-violet-900 via-purple-900 to-fuchsia-900",
+      accentColor: "from-violet-400 to-purple-400",
+      image: "/assets/hero-innovation.jpg",
+      badge: "🚀 Technologie avancée",
+      stats: [
+        { label: "Solutions IoT", value: "50+" },
+        { label: "Projets smart", value: "100+" },
+        { label: "Économie d'énergie", value: "40%" }
+      ]
+    },
+    {
+      title: "Partenariats Exclusifs",
+      subtitle: "Distributeur officiel des plus grandes marques",
+      description: "Legrand • Schneider Electric • ABB • Siemens • Hager • Prix préférentiels • Stock garanti",
+      cta: "Voir nos partenaires",
+      bgColor: "from-indigo-900 via-blue-900 to-cyan-900",
+      accentColor: "from-indigo-400 to-blue-400",
+      image: "/assets/hero-partners.jpg",
+      badge: "🤝 Partenaire officiel",
+      stats: [
+        { label: "Marques partenaires", value: "15+" },
+        { label: "Années de collaboration", value: "12+" },
+        { label: "Remise exclusive", value: "25%" }
+      ]
     }
   ];
 
@@ -166,96 +196,131 @@ const HomePage = () => {
   return (
     <div className={`w-full min-h-screen bg-gray-50 transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       
-      {/* BANNER / SLIDER (images de couleur très chic) */}
-      <section className="relative h-[600px] mb-12 overflow-hidden">
+      {/* BANNER / CAROUSEL MODERNE */}
+      <section className="relative h-[500px] md:h-[650px] lg:h-[700px] mb-12 overflow-hidden rounded-b-3xl shadow-2xl">
+        {/* Particules d'arrière-plan animées */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute top-1/4 right-1/4 w-24 h-24 bg-white/5 rounded-full blur-xl animate-bounce delay-1000"></div>
+          <div className="absolute bottom-1/3 left-1/3 w-20 h-20 bg-white/15 rounded-full blur-lg animate-ping delay-2000"></div>
+        </div>
+
         {/* Slides */}
         {bannerSlides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-all duration-1000 ${
-              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+              index === currentSlide 
+                ? 'opacity-100 scale-100 translate-x-0' 
+                : index < currentSlide 
+                  ? 'opacity-0 scale-95 -translate-x-full' 
+                  : 'opacity-0 scale-95 translate-x-full'
             }`}
           >
-            {/* Arrière-plan avec gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgColor}`} />
-            
-            {/* Badge de promotion */}
-            <div className="absolute top-8 left-8 z-20">
-              <span className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold border border-white/30">
-                {slide.badge}
-              </span>
+            {/* Arrière-plan avec gradient amélioré */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgColor}`}>
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
             </div>
             
-            {/* Contenu principal */}
+            {/* Badge de promotion moderne */}
+            <div className="absolute top-6 left-6 z-20 animate-fadeInDown">
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
+                <span className="relative bg-white/95 backdrop-blur-md text-gray-900 px-6 py-3 rounded-full text-sm font-bold border border-white/50 shadow-lg hover:scale-105 transition-transform duration-300 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  {slide.badge}
+                </span>
+              </div>
+            </div>
+            
+            {/* Contenu principal amélioré */}
             <div className="relative z-10 h-full flex items-center">
-              <div className="container mx-auto px-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <div className="text-white space-y-8">
-                    <div className="space-y-4">
-                      <h1 className="text-5xl lg:text-7xl font-bold leading-tight bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent">
+              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                  <div className="text-white space-y-6 lg:space-y-8 animate-fadeInLeft">
+                    <div className="space-y-4 lg:space-y-6">
+                      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent drop-shadow-lg">
                         {slide.title}
                       </h1>
-                      <p className="text-2xl lg:text-3xl font-medium bg-gradient-to-r from-gray-200 to-gray-300 bg-clip-text text-transparent">
+                      <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold bg-gradient-to-r from-gray-100 to-gray-200 bg-clip-text text-transparent">
                         {slide.subtitle}
                       </p>
-                      <p className="text-xl text-gray-200 leading-relaxed">
+                      <p className="text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed max-w-2xl">
                         {slide.description}
                       </p>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex flex-col sm:flex-row gap-4 lg:gap-6">
                       <Link 
                         to="/products" 
-                        className={`inline-flex items-center justify-center bg-gradient-to-r ${slide.accentColor} text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 shadow-xl border-0 group`}
+                        className={`group relative inline-flex items-center justify-center bg-gradient-to-r ${slide.accentColor} text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 shadow-xl border-0 overflow-hidden`}
                       >
-                        {slide.cta}
-                        <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
+                        <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                        <span className="relative z-10 flex items-center gap-2">
+                          {slide.cta}
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </span>
                       </Link>
                       
-                      <div className="flex items-center gap-6">
+                      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                         {slide.stats.map((stat, statIndex) => (
-                          <div key={statIndex} className="text-center">
-                            <div className="text-2xl font-bold text-white">{stat.value}</div>
-                            <div className="text-sm text-white/80">{stat.label}</div>
+                          <div key={statIndex} className="text-center group cursor-pointer">
+                            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white group-hover:scale-110 transition-transform duration-300">
+                              {stat.value}
+                            </div>
+                            <div className="text-xs sm:text-sm text-white/80 group-hover:text-white transition-colors">
+                              {stat.label}
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
                   
-                  {/* Côté droit avec image et éléments visuels */}
-                  <div className="hidden lg:block relative">
-                    <div className="relative w-full h-96 rounded-2xl overflow-hidden">
-                      {/* Image de fond */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl border border-white/20">
-                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-white/10" />
+                  {/* Côté droit avec éléments visuels modernes */}
+                  <div className="hidden lg:block relative animate-fadeInRight">
+                    <div className="relative w-full h-96 xl:h-[450px]">
+                      {/* Conteneur principal avec glassmorphism */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl">
+                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/5 rounded-3xl" />
                       </div>
                       
-                      {/* Éléments décoratifs modernes */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="grid grid-cols-3 gap-4 w-80 h-80">
-                          {/* Grille d'icônes électriques */}
+                      {/* Grille d'icônes électriques interactive */}
+                      <div className="absolute inset-0 flex items-center justify-center p-8">
+                        <div className="grid grid-cols-3 gap-3 xl:gap-4 w-full max-w-sm xl:max-w-md">
                           {['⚡', '🔌', '💡', '🔧', '⚙️', '🛡️', '📊', '🎯', '✨'].map((icon, iconIndex) => (
                             <div
                               key={iconIndex}
-                              className={`w-20 h-20 rounded-xl bg-gradient-to-br ${slide.accentColor} flex items-center justify-center text-2xl text-white shadow-lg transform transition-all duration-500 hover:scale-110`}
+                              className={`group relative w-16 h-16 xl:w-20 xl:h-20 rounded-2xl bg-gradient-to-br ${slide.accentColor} flex items-center justify-center text-xl xl:text-2xl text-white shadow-xl transform transition-all duration-500 hover:scale-110 hover:rotate-3 cursor-pointer`}
                               style={{
                                 animationDelay: `${iconIndex * 0.1}s`,
                                 animation: 'fadeInUp 0.8s ease-out forwards'
                               }}
                             >
-                              {icon}
+                              <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <span className="relative z-10 group-hover:scale-110 transition-transform duration-300">
+                                {icon}
+                              </span>
+                              
+                              {/* Effet de brillance */}
+                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
                             </div>
                           ))}
                         </div>
                       </div>
                       
-                      {/* Particules flottantes */}
-                      <div className="absolute top-4 right-4 w-3 h-3 bg-white/40 rounded-full animate-pulse" />
-                      <div className="absolute bottom-8 left-8 w-2 h-2 bg-white/60 rounded-full animate-ping" />
-                      <div className="absolute top-1/3 left-4 w-4 h-4 bg-white/30 rounded-full animate-bounce" />
+                      {/* Particules flottantes améliorées */}
+                      <div className="absolute top-6 right-6 w-4 h-4 bg-white/50 rounded-full animate-pulse shadow-lg"></div>
+                      <div className="absolute bottom-12 left-12 w-3 h-3 bg-white/70 rounded-full animate-ping shadow-md"></div>
+                      <div className="absolute top-1/3 left-6 w-5 h-5 bg-white/40 rounded-full animate-bounce shadow-lg"></div>
+                      <div className="absolute bottom-1/4 right-8 w-2 h-2 bg-white/60 rounded-full animate-pulse delay-1000"></div>
+                      
+                      {/* Cercles décoratifs */}
+                      <div className="absolute -top-4 -right-4 w-24 h-24 border-2 border-white/20 rounded-full animate-spin-slow"></div>
+                      <div className="absolute -bottom-6 -left-6 w-32 h-32 border border-white/10 rounded-full animate-pulse"></div>
                     </div>
                   </div>
                 </div>
@@ -264,34 +329,50 @@ const HomePage = () => {
           </div>
         ))}
 
-        {/* Navigation dots améliorée */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
+        {/* Navigation dots moderne */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-3 bg-black/20 backdrop-blur-md rounded-full px-6 py-3 border border-white/20">
           {bannerSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-4 h-4 rounded-full transition-all duration-300 ${
+              className={`relative transition-all duration-300 ${
                 index === currentSlide 
-                  ? 'bg-white scale-125 shadow-lg' 
-                  : 'bg-white/50 hover:bg-white/75 hover:scale-110'
+                  ? 'w-8 h-3 bg-white rounded-full shadow-lg' 
+                  : 'w-3 h-3 bg-white/50 rounded-full hover:bg-white/75 hover:scale-125'
               }`}
-            />
+            >
+              {index === currentSlide && (
+                <div className="absolute inset-0 bg-white/30 rounded-full animate-pulse"></div>
+              )}
+            </button>
           ))}
         </div>
 
-        {/* Boutons de navigation */}
+        {/* Boutons de navigation modernes */}
         <button
-          onClick={() => setCurrentSlide((prev) => (prev - 1 + 3) % 3)}
-          className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110"
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + 5) % 5)}
+          className="group absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 sm:w-14 sm:h-14 bg-black/20 backdrop-blur-md hover:bg-black/30 rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
         >
-          ←
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
         <button
-          onClick={() => setCurrentSlide((prev) => (prev + 1) % 3)}
-          className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110"
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % 5)}
+          className="group absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 sm:w-14 sm:h-14 bg-black/20 backdrop-blur-md hover:bg-black/30 rounded-full flex items-center justify-center text-white transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
         >
-          →
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
+
+        {/* Indicateur de progression */}
+        <div className="absolute top-6 right-6 flex items-center gap-2 bg-black/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+          <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+          <span className="text-white/80 text-sm font-medium">
+            {currentSlide + 1} / {bannerSlides.length}
+          </span>
+        </div>
       </section>
 
       {/* SECTION "Nouveautés" */}
