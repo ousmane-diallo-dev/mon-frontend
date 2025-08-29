@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatPrice } from "../utils/formatPrice";
+import { getProductImageUrl } from "../utils/imageUtils";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addItem } from "../store/slices/cartSlice";
 import { toggleFavorite } from "../store/slices/favoritesSlice";
@@ -36,8 +37,7 @@ const ProductCard = ({
   const dispatch = useAppDispatch();
   const isFav = useAppSelector(s => !!s.favorites.items[produit._id]);
 
-  const defaultImage = "/assets/placeholder.jpg";
-  const imageSrc = produit.images?.[0] || defaultImage;
+  const imageSrc = getProductImageUrl(produit.images);
 
   const handleImageLoad = () => setImageLoaded(true);
   const handleImageError = () => setImageError(true);
@@ -165,7 +165,7 @@ const ProductCard = ({
         <Link to={`/product/${produit._id}`} className="block">
           <div className="relative aspect-square overflow-hidden">
             <img
-              src={imageError ? defaultImage : imageSrc}
+              src={imageError ? "/assets/placeholder.jpg" : imageSrc}
               alt={produit.nom}
               loading="lazy"
               decoding="async"
@@ -213,7 +213,7 @@ const ProductCard = ({
         <Link to={`/product/${produit._id}`} className="block">
           <div className="relative aspect-[4/3] overflow-hidden">
             <img
-              src={imageError ? defaultImage : imageSrc}
+              src={imageError ? "/assets/placeholder.jpg" : imageSrc}
               alt={produit.nom}
               loading="lazy"
               decoding="async"
@@ -282,7 +282,7 @@ const ProductCard = ({
             )}
           </button>
           <img
-            src={imageError ? defaultImage : imageSrc}
+            src={imageError ? "/assets/placeholder.jpg" : imageSrc}
             alt={produit.nom}
             loading="lazy"
             decoding="async"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCategories } from "../api/axios";
+import { getCategories, createManyCategories } from "../api/axios";
 import api from "../api/axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,6 +16,9 @@ const CategoryList = () => {
   const [editValue, setEditValue] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [bulkCategories, setBulkCategories] = useState("");
+  const [bulkAdding, setBulkAdding] = useState(false);
+  const [showBulkForm, setShowBulkForm] = useState(false);
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -158,6 +161,59 @@ const CategoryList = () => {
     }
   };
 
+  const handleBulkAddCategories = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isAdmin) {
+      toast.error('Accès réservé aux administrateurs');
+      return;
+    }
+
+    const lines = bulkCategories.trim().split('\n').filter(line => line.trim());
+    if (lines.length === 0) {
+      toast.error('❌ Veuillez saisir au moins une catégorie');
+      return;
+    }
+
+    const categories = lines.map(line => {
+      const parts = line.split('|').map(p => p.trim());
+      return {
+        nom: parts[0],
+        description: parts[1] || ""
+      };
+    });
+
+    // Validation
+    for (const cat of categories) {
+      if (!validateCategory(cat.nom, cat.description)) {
+        return;
+      }
+    }
+
+    setBulkAdding(true);
+    try {
+      const response = await createManyCategories(categories);
+      console.log("Catégories ajoutées en lot:", response.data);
+      toast.success(`✅ ${categories.length} catégories ajoutées avec succès !`);
+      
+      setBulkCategories("");
+      setShowBulkForm(false);
+      fetchCategories();
+    } catch (err: any) {
+      console.error("Erreur lors de l'ajout en lot:", err);
+      const errorMessage = err.response?.data?.message || "Erreur lors de l'ajout en lot";
+      const doublons = err.response?.data?.doublons;
+      
+      if (doublons && doublons.length > 0) {
+        toast.error(`❌ Catégories déjà existantes: ${doublons.join(', ')}`);
+      } else {
+        toast.error(`❌ ${errorMessage}`);
+      }
+    } finally {
+      setBulkAdding(false);
+    }
+  };
+
   if (loading) return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded shadow">
       <div className="text-center">
@@ -174,7 +230,77 @@ const CategoryList = () => {
       {/* Formulaire d'ajout */}
       {isAdmin && (
       <div className="bg-gray-50 p-6 rounded-lg mb-8">
-        <h3 className="text-xl font-semibold mb-4">➕ Ajouter une nouvelle catégorie</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold">➕ Ajouter des catégories</h3>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setShowBulkForm(false); setBulkCategories(""); }}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                !showBulkForm ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📝 Une par une
+            </button>
+            <button
+              onClick={() => setShowBulkForm(true)}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                showBulkForm ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📋 En lot
+            </button>
+          </div>
+        </div>
+
+        {showBulkForm ? (
+          <form onSubmit={handleBulkAddCategories} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Catégories en lot (une par ligne) *
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Format: <code>Nom de la catégorie</code> ou <code>Nom de la catégorie | Description</code>
+              </p>
+              <textarea
+                placeholder={`Smartphones
+Ordinateurs portables | Laptops et ultrabooks
+Audio | Casques, écouteurs et haut-parleurs
+Accessoires`}
+                value={bulkCategories}
+                onChange={e => setBulkCategories(e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                rows={8}
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <button 
+                type="submit" 
+                disabled={bulkAdding} 
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {bulkAdding ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline"></div>
+                    Ajout en cours...
+                  </>
+                ) : (
+                  "📋 Ajouter toutes les catégories"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkCategories("")}
+                className="bg-gray-400 text-white px-4 py-3 rounded-lg hover:bg-gray-500 transition-colors"
+                disabled={bulkAdding}
+              >
+                🗑️ Vider
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div>
+            <h4 className="text-lg font-medium mb-3">Ajouter une nouvelle catégorie</h4>
         <form onSubmit={handleAddCategory} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -219,6 +345,8 @@ const CategoryList = () => {
             )}
           </button>
         </form>
+          </div>
+        )}
       </div>
       )}
 

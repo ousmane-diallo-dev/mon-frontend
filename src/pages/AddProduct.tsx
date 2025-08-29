@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { addProduct, getCategories } from "../api/axios";
+import { createProduct, getCategories } from "../api/axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -204,7 +204,7 @@ const AddProduct: React.FC = () => {
         imagesCount: images.length
       });
 
-      await addProduct(formDataToSend);
+      await createProduct(formDataToSend);
       
       toast.success("✅ Produit ajouté avec succès !");
       

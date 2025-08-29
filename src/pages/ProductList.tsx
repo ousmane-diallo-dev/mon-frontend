@@ -34,7 +34,7 @@ const ProductList = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(8);
+  const [itemsPerPage] = useState(1000);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
@@ -48,7 +48,7 @@ const ProductList = () => {
     let mounted = true;
     (async () => {
       try {
-        const res = await getProducts();
+        const res = await getProducts({ params: { limit: 1000 } });
         // Certains backends renvoient { data: [...] } ou directement [...]
         const list = Array.isArray((res as any).data?.data) ? (res as any).data.data : (Array.isArray((res as any).data) ? (res as any).data : []);
         const mapped = list.map((p: any) => ({

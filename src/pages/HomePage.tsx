@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { formatPrice } from "../utils/formatPrice";
 import ProductCard from "../components/ProductCard";
+import { getProducts } from "../api/axios";
 
 // Types
 interface Product {
@@ -17,95 +17,44 @@ interface Product {
   nombreAvis?: number;
 }
 
-// Données de test pour les produits
-const nouveautes: Product[] = [
-  { 
-    _id: "p1", 
-    nom: "Prise murale Legrand", 
-    prix: 4500, 
-    images: ["/assets/prise-chic.jpg"],
-    quantiteStock: 50,
-    note: 4.5,
-    nombreAvis: 12
-  },
-  { 
-    _id: "p2", 
-    nom: "Câble électrique 3G2.5", 
-    prix: 12000, 
-    images: ["/assets/cable.jpg"],
-    quantiteStock: 200,
-    note: 4.8,
-    nombreAvis: 25
-  },
-  { 
-    _id: "p3", 
-    nom: "Interrupteur Schneider", 
-    prix: 3500, 
-    images: ["/assets/interrupteur-chic.jpg"],
-    quantiteStock: 75,
-    note: 4.6,
-    nombreAvis: 18
-  },
-  { 
-    _id: "p4", 
-    nom: "Disjoncteur Hager", 
-    prix: 8000, 
-    images: ["/assets/disjoncteur-chic.jpg"],
-    quantiteStock: 30,
-    note: 4.9,
-    nombreAvis: 22
-  }
-];
-
-const produitsPopulaires: Product[] = [
-  { 
-    _id: "p5", 
-    nom: "Tableau électrique", 
-    prix: 25000, 
-    images: ["/assets/prises.jpg"],
-    quantiteStock: 15,
-    note: 4.7,
-    nombreAvis: 30
-  },
-  { 
-    _id: "p6", 
-    nom: "Gaine électrique", 
-    prix: 1500, 
-    images: ["/assets/prise-chic.jpg"],
-    quantiteStock: 500,
-    note: 4.4,
-    nombreAvis: 45
-  },
-  { 
-    _id: "p7", 
-    nom: "Boîte de dérivation", 
-    prix: 800, 
-    images: ["/assets/interrupteur-chic.jpg"],
-    quantiteStock: 100,
-    note: 4.6,
-    nombreAvis: 28
-  },
-  { 
-    _id: "p8", 
-    nom: "Douille LED", 
-    prix: 2500, 
-    images: ["/assets/disjoncteur-chic.jpg"],
-    quantiteStock: 80,
-    note: 4.8,
-    nombreAvis: 35
-  }
-];
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [nouveautes, setNouveautes] = useState<Product[]>([]);
+  const [produitsPopulaires, setProduitsPopulaires] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Utiliser useCallback pour éviter la recréation de la fonction
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % 5);
   }, []);
 
+  // Charger les produits depuis l'API
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getProducts({ params: { limit: 1000 } }) as any;
+        const products = response.data?.data || response.data || [];
+        
+        // Traiter les catégories si elles sont des objets
+        const processedProducts = products.map((p: any) => ({
+          ...p,
+          categorie: typeof p.categorie === 'object' && p.categorie !== null ? p.categorie.nom : p.categorie
+        }));
+        
+        // Prendre les 4 premiers pour nouveautés et les 4 suivants pour populaires
+        setNouveautes(processedProducts.slice(0, 4));
+        setProduitsPopulaires(processedProducts.slice(4, 8));
+      } catch (error) {
+        console.error('Erreur lors du chargement des produits:', error);
+        // Garder les données de test en cas d'erreur
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
     setIsVisible(true);
     
     // Auto-slide pour le hero
@@ -387,15 +336,28 @@ const HomePage = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {nouveautes.map((product) => (
-            <ProductCard 
-              key={product._id} 
-              produit={product} 
-              variant="default"
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={idx} className="rounded-xl border border-gray-200 p-4 animate-pulse bg-white">
+                <div className="aspect-square rounded-lg bg-gray-200 mb-4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                <div className="h-10 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {nouveautes.map((product) => (
+              <ProductCard 
+                key={product._id} 
+                produit={product} 
+                variant="default"
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* SECTION "Catégories populaires" */}
@@ -447,15 +409,28 @@ const HomePage = () => {
           </Link>
         </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {produitsPopulaires.map((product) => (
-          <ProductCard 
-            key={product._id} 
-            produit={product} 
-            variant="default"
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="rounded-xl border border-gray-200 p-4 animate-pulse bg-white">
+              <div className="aspect-square rounded-lg bg-gray-200 mb-4" />
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+              <div className="h-10 bg-gray-200 rounded" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {produitsPopulaires.map((product) => (
+            <ProductCard 
+              key={product._id} 
+              produit={product} 
+              variant="default"
+            />
+          ))}
+        </div>
+      )}
       </section>
 
       {/* SECTION "Nos Avantages" */}

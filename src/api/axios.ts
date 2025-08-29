@@ -31,16 +31,18 @@ export const registerUser = (userData: { nom: string; email: string; motDePasse:
 // Produits
 export const getProducts = (config?: { params?: Record<string, any> }) => api.get("/api/products", config);
 export const getProduct = (id: string) => api.get(`/api/products/${id}`);
-export const addProduct = (productData: FormData, token?: string) =>
-  api.post("/api/products", productData, {
-    headers: { 
-      "Content-Type": "multipart/form-data",
-      ...(token && { Authorization: `Bearer ${token}` })
-    },
-  });
+export const getSimilarProducts = (productId: string, limit: number = 4) => 
+  api.get(`/api/products/${productId}/similar?limit=${limit}`);
+export const createProduct = (productData: FormData) => api.post("/api/products", productData, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
 
 // Catégories
 export const getCategories = (config?: { params?: Record<string, any> }) => api.get("/api/categories", config);
+export const createManyCategories = (categories: { nom: string; description?: string }[]) => 
+  api.post("/api/categories/many", categories);
 
 // Commandes
 export const createOrder = (orderData: any) => api.post("/api/orders", orderData);
