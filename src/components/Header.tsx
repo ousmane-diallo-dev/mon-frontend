@@ -18,6 +18,7 @@ const Header: React.FC = () => {
   const handleNavigation = (path: string) => {
     navigate(path);
     setSidebarOpen(false);
+    setAuthMenuOpen(false);
   };
 
   const handleLogout = async () => {
@@ -57,12 +58,12 @@ const Header: React.FC = () => {
               className="flex items-center space-x-3 text-xl font-bold transition-all duration-300 hover:scale-105 active:scale-95"
             >
               <div className="relative">
-                {/* Logo principal avec effet éclair */}
-                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:rotate-3">
-                  <svg className="w-7 h-7 text-white animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                  </svg>
-                </div>
+                {/* Logo principal */}
+                <img 
+                  src="/electropro-chic-logo.svg" 
+                  alt="ElectroPro Logo" 
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               
               {/* Texte logo avec gradient */}
@@ -71,7 +72,7 @@ const Header: React.FC = () => {
                   ElectroPro
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 font-medium -mt-1 hidden sm:block">
-                  Matériels Électricité
+                  Matériel Électricité Professionnel
                 </span>
               </div>
               

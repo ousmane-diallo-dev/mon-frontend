@@ -10,7 +10,7 @@ const Favorites = () => {
   const list = useMemo(() => Object.values(favorites), [favorites]);
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="w-full min-h-screen">
       <div className="container mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">❤️ Favoris</h1>

@@ -4,7 +4,7 @@ import ProductCard from "../components/ProductCard";
 import { formatPrice } from "../utils/formatPrice";
 import { useAppDispatch } from "../store/hooks";
 import { addItem } from "../store/slices/cartSlice";
-import { getProduct, getProducts } from "../api/axios";
+import { getProduct } from "../api/axios";
 
 // Types
 interface Product {
@@ -82,12 +82,43 @@ const produitsSimilaires: Product[] = [
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const produit = produitExemple; // Remplace par fetch API selon id
+  const [produit, setProduit] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const [quantite, setQuantite] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Charger le produit depuis l'API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) {
+        setError("ID du produit manquant");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await getProduct(id);
+        console.log("Produit chargé:", response.data);
+        setProduit(response.data as Product);
+        setError(null);
+      } catch (error: any) {
+        console.error("Erreur lors du chargement du produit:", error);
+        setError(error?.response?.data?.message || "Erreur lors du chargement du produit");
+        // Utiliser les données de test en cas d'erreur
+        setProduit(produitExemple);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
   const handleAddToCart = () => {
+    if (!produit) return;
     dispatch(addItem({
       _id: produit._id,
       nom: produit.nom,
@@ -102,10 +133,46 @@ const ProductDetail = () => {
     setCurrentImageIndex(index);
   };
 
+  // Affichage de chargement
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement du produit...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage d'erreur
+  if (error && !produit) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Produit introuvable</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Link 
+            to="/products" 
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retour au catalogue
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Si pas de produit, ne rien afficher
+  if (!produit) {
+    return null;
+  }
+
   const isOutOfStock = produit.quantiteStock === 0;
   const hasDiscount = produit.enPromotion && produit.prixPromo && produit.prixPromo < produit.prix;
   const discountPercentage = hasDiscount 
-    ? Math.round(((produit.prix - produit.prixPromo) / produit.prix) * 100)
+    ? Math.round(((produit.prix - (produit.prixPromo || 0)) / produit.prix) * 100)
     : 0;
 
   return (

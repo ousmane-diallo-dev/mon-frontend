@@ -3,6 +3,7 @@ import NotFound from "./pages/NotFound";
 // Composants globaux
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import ChatWidget from "./components/ChatWidget";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -40,6 +41,7 @@ import AdminCategories from "./pages/AdminCategories";
 import AdminOrders from "./pages/AdminOrders";
 import AdminUsers from "./pages/AdminUsers";
 import AdminPayments from "./pages/AdminPayments";
+import AdminChat from "./pages/AdminChat";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import UserList from "./pages/UserList";
@@ -49,18 +51,22 @@ import UserList from "./pages/UserList";
 const App = () => (
   <div className="w-full min-h-screen flex flex-col">
     <Header />
-    <main className="flex-1 w-full bg-gray-50 p-0">
+    <main className="flex-1 w-full p-0">
       <Routes>
         {/* 🌐 Routes publiques */}
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<ProductList />} />
-        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/category" element={<CategoryList />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/services" element={<Services />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/invoice" element={<Invoice />} />
+        <Route path="/invoice" element={
+          <div className="w-full min-h-screen">
+            <Invoice />
+          </div>
+        } />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -87,6 +93,7 @@ const App = () => (
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/payments" element={<AdminPayments />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/chat" element={<AdminChat />} />
           <Route path="/admin/add-product" element={<AddProduct />} />
           <Route path="/admin/products/edit/:id" element={<EditProduct />} />
           <Route path="/admin/user-list" element={<UserList />} />
@@ -97,6 +104,9 @@ const App = () => (
       </Routes>
     </main>
     <Footer />
+    
+    {/* Widget de chat global */}
+    <ChatWidget />
   </div>
 );
 
