@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import ChatWidget from "./components/ChatWidget";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import { useGlobalScrollToTop } from "./utils/scrollToTop";
 
 // Pages publiques
 import HomePage from "./pages/HomePage";
@@ -48,10 +49,14 @@ import UserList from "./pages/UserList";
 
 // Page 404 (à créer si elle n'existe pas encore)
 
-const App = () => (
-  <div className="w-full min-h-screen flex flex-col">
-    <Header />
-    <main className="flex-1 w-full p-0">
+const App = () => {
+  // Hook global pour scroll automatique sur tous les clics
+  useGlobalScrollToTop();
+
+  return (
+    <div className="w-full min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 w-full p-0">
       <Routes>
         {/* 🌐 Routes publiques */}
         <Route path="/" element={<HomePage />} />
@@ -108,6 +113,7 @@ const App = () => (
     {/* Widget de chat global */}
     <ChatWidget />
   </div>
-);
+  );
+};
 
 export default App;

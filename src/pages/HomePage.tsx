@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getProducts } from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 
 // Types
 interface Product {
@@ -19,6 +20,7 @@ interface Product {
 
 
 const HomePage = () => {
+  const { user } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [nouveautes, setNouveautes] = useState<Product[]>([]);
@@ -203,7 +205,7 @@ const HomePage = () => {
                     <div className="flex flex-col sm:flex-row gap-4 lg:gap-6">
                       <Link 
                         to="/products" 
-                        className={`group relative inline-flex items-center justify-center bg-gradient-to-r ${slide.accentColor} text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 shadow-xl border-0 overflow-hidden`}
+                                    className={`group relative inline-flex items-center justify-center bg-gradient-to-r ${slide.accentColor} text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 shadow-xl border-0 overflow-hidden`}
                       >
                         <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                         <span className="relative z-10 flex items-center gap-2">
@@ -381,17 +383,13 @@ const HomePage = () => {
             <Link
               key={index}
               to="/category"
-              className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
+                className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
             >
               <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${categorie.couleur} flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300`}>
                 {categorie.icon}
               </div>
-              <h3 className="font-bold text-gray-900 text-center mb-2 group-hover:text-blue-600 transition-colors duration-300">
-                {categorie.nom}
-              </h3>
-              <p className="text-sm text-gray-500 text-center">
-                {categorie.count}
-              </p>
+              <h3 className="font-bold text-gray-800 text-center mb-2">{categorie.nom}</h3>
+              <p className="text-sm text-gray-500 text-center">{categorie.count}</p>
             </Link>
           ))}
         </div>
@@ -400,7 +398,7 @@ const HomePage = () => {
       {/* SECTION "Produits populaires" */}
       <section className="container mx-auto px-6 mb-16">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">🔥 Produits populaires</h2>
+          <h2 className="text-3xl font-bold text-gray-900">🔥 Produits Populaires</h2>
           <Link 
             to="/products" 
             className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
@@ -408,143 +406,115 @@ const HomePage = () => {
             Voir tout →
           </Link>
         </div>
-      
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="rounded-xl border border-gray-200 p-4 animate-pulse bg-white">
-              <div className="aspect-square rounded-lg bg-gray-200 mb-4" />
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
-              <div className="h-10 bg-gray-200 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {produitsPopulaires.map((product) => (
-            <ProductCard 
-              key={product._id} 
-              produit={product} 
-              variant="default"
-            />
-          ))}
-        </div>
-      )}
+        
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={idx} className="rounded-xl border border-gray-200 p-4 animate-pulse bg-white">
+                <div className="aspect-square rounded-lg bg-gray-200 mb-4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                <div className="h-10 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {produitsPopulaires.map((product) => (
+              <ProductCard 
+                key={product._id} 
+                produit={product} 
+                variant="default"
+              />
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* SECTION "Nos Avantages" */}
-      <section className="bg-gradient-to-r from-gray-50 to-blue-50 py-16 mb-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">✨ Pourquoi Choisir ElectroPro ?</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nous nous engageons à vous offrir la meilleure expérience d'achat
-            </p>
-          </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            {
-              icon: "🚚",
-              titre: "Livraison Rapide",
-              description: "Livraison gratuite à partir de 50 000 GNF",
-              couleur: "from-blue-500 to-cyan-500"
-            },
-            {
-              icon: "🛡️",
-              titre: "Garantie Qualité",
-              description: "Produits certifiés avec garantie officielle",
-              couleur: "from-green-500 to-emerald-500"
-            },
-            {
-              icon: "💬",
-              titre: "Support 24/7",
-              description: "Assistance technique et commerciale",
-              couleur: "from-purple-500 to-violet-500"
-            },
-            {
-              icon: "💳",
-              titre: "Paiement Sécurisé",
-              description: "Transactions 100% sécurisées",
-              couleur: "from-orange-500 to-red-500"
-            }
-          ].map((avantage, index) => (
-            <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center group">
-              <div className={`w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r ${avantage.couleur} flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300`}>
-                {avantage.icon}
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300">
-                {avantage.titre}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {avantage.description}
+            {/* SECTION "Nos Avantages" */}
+      {!user && (
+        <section className="bg-gray-100 py-16">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">🌟 Pourquoi nous choisir ?</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Nous nous engageons à fournir des produits et services de la plus haute qualité.
               </p>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    {/* SECTION "Témoignages Clients" */}
-    <section className="container mx-auto px-6 mb-16">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl font-bold text-gray-900 mb-4">💬 Ce Que Disent Nos Clients</h2>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          La satisfaction de nos clients est notre priorité
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          {
-            nom: "Mamadou Diallo",
-            profession: "Électricien",
-            avis: "Excellent service ! Produits de qualité et livraison rapide. Je recommande vivement ElectroPro pour tous vos besoins électriques.",
-            note: 5,
-            avatar: "👨‍🔧"
-          },
-          {
-            nom: "Fatoumata Camara",
-            profession: "Architecte",
-            avis: "Interface très intuitive et large choix de produits. L'équipe technique m'a beaucoup aidée dans mes projets.",
-            note: 5,
-            avatar: "👩‍💼"
-          },
-          {
-            nom: "Ibrahim Touré",
-            profession: "Particulier",
-            avis: "Prix compétitifs et conseils professionnels. Parfait pour mes travaux de rénovation à la maison.",
-            note: 4,
-            avatar: "👨‍🏠"
-          }
-        ].map((temoignage, index) => (
-          <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
-            <div className="flex items-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-2xl mr-4">
-                {temoignage.avatar}
-              </div>
-              <div>
-                <h4 className="font-bold text-gray-900 text-lg">{temoignage.nom}</h4>
-                <p className="text-gray-600">{temoignage.profession}</p>
-              </div>
-            </div>
             
-            <div className="flex mb-4">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className={`w-5 h-5 ${i < temoignage.note ? 'text-yellow-400' : 'text-gray-300'} fill-current`} viewBox="0 0 20 20">
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                </svg>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                { icon: "🏆", titre: "Qualité Garantie", description: "Produits certifiés conformes aux normes internationales." },
+                { icon: "🚚", titre: "Livraison Rapide", description: "Expédition sur tout le territoire guinéen en 24/48h." },
+                { icon: "💡", titre: "Conseil d'Experts", description: "Notre équipe technique vous accompagne dans vos projets." },
+                { icon: "💰", titre: "Meilleurs Prix", description: "Des tarifs compétitifs pour les professionnels et particuliers." }
+              ].map((avantage, index) => (
+                <div key={index} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 text-center transform hover:-translate-y-1">
+                  <div className="text-5xl mb-4">{avantage.icon}</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{avantage.titre}</h3>
+                  <p className="text-gray-600">{avantage.description}</p>
+                </div>
               ))}
             </div>
-            
-            <p className="text-gray-700 italic leading-relaxed">
-              "{temoignage.avis}"
+          </div>
+        </section>
+      )}
+
+      {/* SECTION "Témoignages Clients" - Masquée si l'utilisateur est connecté */}
+      {!user && (
+        <section className="container mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">💬 Ce que disent nos clients</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              La satisfaction de nos clients est notre plus grande récompense.
             </p>
           </div>
-        ))}
-      </div>
-    </section>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                nom: "Moussa Camara",
+                role: "Électricien Professionnel",
+                avis: "ElectroPro est mon fournisseur n°1. Leurs produits sont fiables, les prix compétitifs et la livraison toujours à temps. L'équipe est experte et de bon conseil.",
+                note: 5,
+                avatar: "/assets/avatar-1.jpg"
+              },
+              {
+                nom: "Fatoumata Sylla",
+                role: "Architecte d'intérieur",
+                avis: "Je trouve toujours des solutions d'éclairage et des appareillages modernes chez ElectroPro. Leur catalogue est vaste et la qualité est irréprochable. Un partenaire de choix.",
+                note: 5,
+                avatar: "/assets/avatar-2.jpg"
+              },
+              {
+                nom: "Ibrahima Diallo",
+                role: "Chef de chantier",
+                avis: "Pour mes chantiers, je ne fais confiance qu'à ElectroPro. Le matériel est robuste, certifié et disponible en grande quantité. Le service client est très réactif.",
+                note: 5,
+                avatar: "/assets/avatar-3.jpg"
+              }
+            ].map((temoignage, index) => (
+              <div key={index} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 transform hover:-translate-y-1">
+                <div className="flex items-center mb-4">
+                  <img src={temoignage.avatar} alt={temoignage.nom} className="w-14 h-14 rounded-full mr-4 border-2 border-blue-500 object-cover" />
+                  <div>
+                    <h4 className="font-bold text-lg text-gray-900">{temoignage.nom}</h4>
+                    <p className="text-sm text-gray-500">{temoignage.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 mb-4 leading-relaxed">"{temoignage.avis}"</p>
+                <div className="flex items-center">
+                  {[...Array(temoignage.note)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

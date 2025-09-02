@@ -119,7 +119,7 @@ const Invoice = () => {
                     <div className="mt-2 space-y-1">
                       <p className="text-sm text-gray-600 dark:text-gray-300">📍 Conakry, République de Guinée</p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">📞 +224 625 14 74 22</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">✉️ contact@electropro.gn</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">✉️ electroproguinee@gmail.com</p>
                     </div>
                   </div>
                 </div>
@@ -204,9 +204,6 @@ const Invoice = () => {
               <div className="mb-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                   Merci pour votre confiance ! Conservez cette facture pour vos dossiers.
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500">
-                  Conditions de paiement: 30 jours • Garantie selon conditions du fabricant
                 </p>
               </div>
               <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 px-6 rounded-lg inline-block">

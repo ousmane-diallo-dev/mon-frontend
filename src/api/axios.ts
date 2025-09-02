@@ -72,6 +72,9 @@ export const uploadProfilePhoto = (file: File) => {
 export const requestPasswordReset = (email: string) =>
   api.post("/api/password-reset/request", { email });
 
+export const verifyOTP = (email: string, otp: string) =>
+  api.post("/api/password-reset/verify-otp", { email, otp });
+
 export const verifyPasswordResetToken = (token: string) =>
   api.get(`/api/password-reset/verify/${encodeURIComponent(token)}`);
 

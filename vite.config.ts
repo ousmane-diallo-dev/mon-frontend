@@ -5,7 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 3001,
+    strictPort: true,
+    host: true,
     open: true
   },
   css: { postcss: './postcss.config.js' }

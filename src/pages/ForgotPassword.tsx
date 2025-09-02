@@ -1,13 +1,18 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
-import { requestPasswordReset, cancelPasswordReset } from "../api/axios";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { requestPasswordReset, verifyOTP, cancelPasswordReset } from '../api/axios';
+import { toast } from 'react-toastify';
+import OTPModal from '../components/OTPModal';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [requested, setRequested] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
 
   const handleRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +29,8 @@ const ForgotPassword: React.FC = () => {
       setServerError(null);
       await requestPasswordReset(trimmed);
       setRequested(true);
-      toast.success("Lien de réinitialisation envoyé. Vérifiez votre email.");
+      setShowOTPModal(true);
+      toast.success("Code OTP envoyé. Vérifiez votre email.");
     } catch (err: any) {
       const msg = err?.response?.data?.message || "Erreur lors de la demande";
       setRequested(false);
@@ -35,11 +41,33 @@ const ForgotPassword: React.FC = () => {
     }
   };
 
+  const handleVerifyOTP = async (otpCode: string) => {
+    try {
+      setOtpLoading(true);
+      setOtpError(null);
+      await verifyOTP(email, otpCode);
+      setShowOTPModal(false);
+      toast.success("Code OTP vérifié avec succès ! Vérifiez votre email pour le lien de réinitialisation.");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Code OTP invalide";
+      setOtpError(msg);
+      toast.error(msg);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleCloseOTPModal = () => {
+    setShowOTPModal(false);
+    setOtpError(null);
+  };
+
   const handleCancel = async () => {
     try {
       setLoading(true);
       await cancelPasswordReset(email);
       setRequested(false);
+      setShowOTPModal(false);
       toast.success("Demande de réinitialisation annulée.");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Erreur lors de l'annulation");
@@ -103,14 +131,23 @@ const ForgotPassword: React.FC = () => {
               </button>
 
               {requested && (
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={loading}
-                  className="w-full py-2 px-4 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-md border border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Annuler la demande
-                </button>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowOTPModal(true)}
+                    className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors"
+                  >
+                    Entrer le code OTP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    disabled={loading}
+                    className="w-full py-2 px-4 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-md border border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Annuler la demande
+                  </button>
+                </div>
               )}
             </div>
           </form>
@@ -123,8 +160,8 @@ const ForgotPassword: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <div>
-                  <p className="font-medium text-green-800">Lien envoyé avec succès !</p>
-                  <p className="text-sm text-green-600">Vérifiez votre boîte de réception.</p>
+                  <p className="font-medium text-green-800">Code OTP envoyé !</p>
+                  <p className="text-sm text-green-600">Vérifiez votre boîte de réception et cliquez sur "Entrer le code OTP".</p>
                 </div>
               </div>
             </div>
@@ -158,6 +195,16 @@ const ForgotPassword: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* Modal OTP */}
+      <OTPModal
+        isOpen={showOTPModal}
+        onClose={handleCloseOTPModal}
+        email={email}
+        onVerifyOTP={handleVerifyOTP}
+        loading={otpLoading}
+        error={otpError}
+      />
     </div>
   );
 };
