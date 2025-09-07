@@ -48,8 +48,12 @@ export const createManyCategories = (categories: { nom: string; description?: st
 export const createOrder = (orderData: any) => api.post("/api/orders", orderData);
 export const getOrders = () => api.get("/api/orders");
 export const getOrder = (id: string) => api.get(`/api/orders/${id}`);
+export const updateOrder = (id: string, orderData: any) => api.put(`/api/orders/${id}`, orderData);
+export const getInvoice = (id: string) => api.get(`/api/orders/${id}/invoice`);
 export const adminUpdateOrderStatus = (id: string, statut: 'en attente'|'en cours'|'expédiée'|'livrée'|'annulée') =>
   api.put(`/api/orders/${id}/status`, { statut });
+export const adminValidateOrder = (id: string) => api.put(`/api/orders/${id}/validate`);
+export const adminRejectOrder = (id: string, raison: string) => api.put(`/api/orders/${id}/reject`, { raison });
 
 // Paiements
 export const createPayment = (paymentData: any) => api.post("/api/payments", paymentData);

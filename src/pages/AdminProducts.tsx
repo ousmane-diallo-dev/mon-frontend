@@ -280,23 +280,23 @@ const AdminProducts: React.FC = () => {
               <div className="block lg:hidden">
                 <div className="p-4 space-y-4">
                   {filteredProducts.map((product) => (
-                    <div key={product._id} className="bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div key={product._id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-lg transition-all duration-300">
                       <div className="flex items-start space-x-4 mb-4">
                         <div className="w-20 h-20 rounded-xl overflow-hidden shadow-lg">
                           <img
                             className="w-full h-full object-cover"
-                            src={product.images[0] || '/images/placeholder.jpg'}
+                            src={product.images?.[0] || '/images/placeholder.jpg'}
                             alt={product.nom}
                           />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-bold text-gray-900 text-lg mb-1">{product.nom}</h4>
-                          <p className="text-sm text-gray-500 line-clamp-2 mb-2">{product.description}</p>
+                          <h4 className="font-bold text-gray-900 text-base mb-1">{product.nom}</h4>
+                          <p className="text-xs text-gray-500 line-clamp-2 mb-2">{product.description}</p>
                           <div className="flex items-center space-x-2">
-                            <span className="inline-flex px-2 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800">
+                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                               {product.categorie}
                             </span>
-                            <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               product.quantiteStock === 0
                                 ? 'bg-red-100 text-red-800 border border-red-200'
                                 : product.quantiteStock <= 5
@@ -310,12 +310,12 @@ const AdminProducts: React.FC = () => {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-green-50 rounded-lg p-3">
+                        <div className="bg-green-50 rounded-lg p-2 text-center">
                           <p className="text-xs font-medium text-green-600 mb-1">Prix</p>
-                          <p className="font-bold text-lg text-gray-900">{formatPrice(product.prix)}</p>
+                          <p className="font-bold text-base text-gray-900">{formatPrice(product.prix)}</p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg p-3">
-                          <p className="text-xs font-medium text-blue-600 mb-1">Ajouté le</p>
+                        <div className="bg-blue-50 rounded-lg p-2 text-center">
+                          <p className="text-xs font-medium text-blue-600 mb-1">Ajout</p>
                           <p className="font-semibold text-gray-900 text-sm">{formatDate(product.createdAt)}</p>
                         </div>
                       </div>
@@ -323,13 +323,13 @@ const AdminProducts: React.FC = () => {
                       <div className="flex flex-wrap gap-2">
                         <Link
                           to={`/admin/products/edit/${product._id}`}
-                          className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-center"
+                          className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md text-center"
                         >
                           ✏️ Modifier
                         </Link>
                         <button
                           onClick={() => handleDeleteProduct(product._id)}
-                          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
                         >
                           🗑️ Supprimer
                         </button>
@@ -342,7 +342,7 @@ const AdminProducts: React.FC = () => {
               {/* Vue desktop - Table améliorée */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                         <div className="flex items-center space-x-2">
@@ -389,13 +389,13 @@ const AdminProducts: React.FC = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredProducts.map((product, index) => (
-                      <tr key={product._id} className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <tr key={product._id} className="hover:bg-gray-50 transition-colors duration-200">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-4">
                             <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg">
                               <img
                                 className="w-full h-full object-cover"
-                                src={product.images[0] || '/images/placeholder.jpg'}
+                                src={product.images?.[0] || '/images/placeholder.jpg'}
                                 alt={product.nom}
                               />
                             </div>
@@ -408,7 +408,7 @@ const AdminProducts: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-200 shadow-sm">
+                          <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
                             </svg>
@@ -416,20 +416,10 @@ const AdminProducts: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-green-500 rounded-lg flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-lg font-bold text-gray-900">{formatPrice(product.prix)}</p>
-                              <p className="text-xs text-gray-500">Prix unitaire</p>
-                            </div>
-                          </div>
+                          <p className="text-sm font-semibold text-gray-900">{formatPrice(product.prix)}</p>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full shadow-sm border ${
+                          <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${
                             product.quantiteStock === 0
                               ? 'bg-red-100 text-red-800 border-red-200'
                               : product.quantiteStock <= 5
@@ -461,31 +451,21 @@ const AdminProducts: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{formatDate(product.createdAt)}</p>
-                              <p className="text-xs text-gray-500">Ajouté</p>
-                            </div>
-                          </div>
+                          <p className="text-sm text-gray-700">{formatDate(product.createdAt)}</p>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
                             <Link
                               to={`/admin/products/edit/${product._id}`}
-                              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-xs font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                              className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50" title="Modifier"
                             >
-                              ✏️
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </Link>
                             <button
                               onClick={() => handleDeleteProduct(product._id)}
-                              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-xs font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                              className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50" title="Supprimer"
                             >
-                              🗑️
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                           </div>
                         </td>

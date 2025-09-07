@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { getProducts } from "../api/axios";
 
 interface SearchSuggestion {
   id: string;
@@ -16,6 +17,7 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   suggestions?: SearchSuggestion[];
   isLoading?: boolean;
+  minChars?: number; // Nombre minimal de caractères pour déclencher la recherche dynamique (par défaut 2)
 }
 
 const SearchBar = ({
@@ -24,13 +26,16 @@ const SearchBar = ({
   showSuggestions = true,
   onSearch,
   suggestions = [],
-  isLoading = false
+  isLoading = false,
+  minChars = 2,
 }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState<SearchSuggestion[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const loading = isLoading || fetchLoading;
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -48,18 +53,60 @@ const SearchBar = ({
     }
   }, []);
 
-  // Filtrer les suggestions basées sur la requête
+  // Filtrer dynamiquement dès la saisie
+  // - Si des suggestions sont passées en props: filtrage local (sous-chaîne)
+  // - Sinon: récupération distante depuis l'API produits avec q (dès minChars)
   useEffect(() => {
-    if (query.trim() && suggestions.length > 0) {
-      const filtered = suggestions.filter(suggestion =>
-        suggestion.name.toLowerCase().includes(query.toLowerCase()) ||
-        suggestion.description?.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredSuggestions(filtered.slice(0, 8)); // Limiter à 8 suggestions
-    } else {
-      setFilteredSuggestions([]);
-    }
-  }, [query, suggestions.length]); // Utiliser suggestions.length au lieu de suggestions
+  const q = query.trim();
+  
+  if (q.length >= minChars) {  // Filtrage local si une liste est fournie
+  if (suggestions && suggestions.length > 0) {
+  const filtered = suggestions.filter((s) =>
+  s.name.toLowerCase().includes(q.toLowerCase()) ||
+  (s.description?.toLowerCase() || '').includes(q.toLowerCase())
+  ).slice(0, 8);
+  
+  setFilteredSuggestions(prev => {
+  const same = JSON.stringify(prev) === JSON.stringify(filtered);
+  return same ? prev : filtered;
+  });
+  return;
+  }
+  
+  // Récupération distante sinon
+  if (showSuggestions) {
+  setFetchLoading(true);
+  const timer = setTimeout(async () => {
+  try {
+  const resp = await getProducts({ params: { q, limit: 8 } });
+  const data = resp?.data?.data || resp?.data || [];
+  const mapped: SearchSuggestion[] = (Array.isArray(data) ? data : []).map((p: any) => ({
+  id: String(p._id || p.id || Math.random()),
+  type: 'product',
+  name: String(p.nom || p.name || ''),
+  description: p.description ? String(p.description) : undefined,
+  image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined,
+  }));
+  
+  setFilteredSuggestions(prev => {
+  const same = JSON.stringify(prev) === JSON.stringify(mapped);
+  return same ? prev : mapped;
+  });
+  } catch (e) {
+  console.error('Erreur de récupération des suggestions:', e);
+  setFilteredSuggestions(prev => (prev.length ? [] : prev));
+  } finally {
+  setFetchLoading(false);
+  }
+  }, 250); // debounce
+  
+  return () => clearTimeout(timer);
+  }
+  }
+  
+  // Si sous le seuil, ne pas réinitialiser en boucle inutilement
+  setFilteredSuggestions(prev => (prev.length ? [] : prev));
+  }, [query, minChars, showSuggestions, suggestions.length]);
 
   // Gérer les clics en dehors du composant
   useEffect(() => {
@@ -167,7 +214,7 @@ const SearchBar = ({
       {/* Barre de recherche moderne et interactive */}
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-          {isLoading ? (
+          {loading ? (
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-indigo-600 border-t-transparent"></div>
           ) : (
             <svg className="h-6 w-6 text-indigo-500 group-hover:text-indigo-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +240,7 @@ const SearchBar = ({
         {/* Bouton de recherche moderne */}
         <button
           onClick={() => handleSearch()}
-          disabled={!query.trim() || isLoading}
+          disabled={!query.trim() || loading}
           className="absolute inset-y-0 right-2 top-2 bottom-2 px-6 text-gray-600 rounded-xl hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-300 font-bold text-sm transform hover:scale-105 disabled:transform-none flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -249,7 +249,7 @@ const AdminCategories: React.FC = () => {
 
         {/* Add/Edit Form */}
         {showAddForm && (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8 animate-in slide-in-from-top-4 duration-300">
             <div className="flex items-center mb-6">
               <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-3 mr-4">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,7 +329,7 @@ const AdminCategories: React.FC = () => {
 
         {/* Categories List */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          {categories.length > 0 ? (
+          {loading ? ( <div className="p-8 text-center">Chargement...</div> ) : categories.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
@@ -353,7 +353,7 @@ const AdminCategories: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {categories.map((category) => (
-                    <tr key={category._id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <tr key={category._id} className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 transition-colors duration-200">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -362,7 +362,7 @@ const AdminCategories: React.FC = () => {
                             </span>
                           </div>
                           <div className="ml-4">
-                            <div className="text-lg font-semibold text-gray-900">{category.nom}</div>
+                            <div className="text-base font-semibold text-gray-900">{category.nom}</div>
                           </div>
                         </div>
                       </td>
@@ -375,7 +375,7 @@ const AdminCategories: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                           category.produitCount === 0
                             ? 'bg-gray-100 text-gray-800'
                             : category.produitCount <= 5
@@ -389,7 +389,7 @@ const AdminCategories: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center">
+                        <div className="flex items-center text-xs">
                           <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                           </svg>
@@ -399,7 +399,7 @@ const AdminCategories: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleEdit(category)}
+                            onClick={() => { handleEdit(category); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                             className="flex items-center space-x-1 text-blue-600 hover:text-blue-900 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-200"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

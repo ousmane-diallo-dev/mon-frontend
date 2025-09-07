@@ -1,6 +1,6 @@
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getOrder } from "../api/axios";
+import { getInvoice } from "../api/axios";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -14,12 +14,12 @@ const Invoice = () => {
     (async () => {
       if (invoice || !orderId) return;
       try {
-        const res = await getOrder(orderId);
+        const res = await getInvoice(orderId);
         const order = res.data?.data || res.data;
         const inv = {
           id: `FA-${String(order._id).slice(-8).toUpperCase()}`,
-          date: new Date(order.createdAt || Date.now()).toLocaleDateString(),
-          customer: { name: order.utilisateur?.nom || 'Client', email: order.utilisateur?.email || '' },
+          date: new Date(order.createdAt || order.dateCommande || Date.now()).toLocaleDateString(),
+          customer: { name: `${order.client?.prenom || ''} ${order.client?.nom || ''}`.trim() || 'Client', email: order.client?.email || '' },
           items: (order.produits || []).map((it: any) => ({ nom: it.produit?.nom, quantite: it.quantite, prix: it.prixUnitaire })),
           total: order.montantTotal || 0,
         };

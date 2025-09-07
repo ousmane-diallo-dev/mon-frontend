@@ -1,6 +1,7 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect, useRef, useCallback } from "react";
 import axios from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
+import { MessageSquare, X } from 'lucide-react';
 
 interface ChatMessage {
   sender: 'user' | 'support';
@@ -14,15 +15,59 @@ interface UserInfo {
   telephone?: string;
 }
 
+interface ApiChatMessage {
+  _id: string;
+  messageType: 'user' | 'admin';
+  message: string;
+  createdAt: string;
+}
+
+const CHAT_CONVERSATION_ID_KEY = 'chatConversationId_v2';
+
 const ChatWidget = () => {
   const { user } = useContext(AuthContext) || { user: null };
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(() => localStorage.getItem(CHAT_CONVERSATION_ID_KEY));
   const [userInfoCollected, setUserInfoCollected] = useState(false);
   const [guestInfo, setGuestInfo] = useState<UserInfo>({ nom: "", email: "" });
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages]);
+
+  const fetchHistory = useCallback(async () => {
+    if (!conversationId) return;
+      try {
+        const response = await axios.get(`/api/chat/history/${conversationId}`);
+        const apiMessages: ApiChatMessage[] = response.data.data || [];
+        
+        const formattedMessages: ChatMessage[] = apiMessages.map(msg => ({
+          sender: msg.messageType === 'admin' ? 'support' : 'user',
+          text: msg.message,
+          time: new Date(msg.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        }));
+
+        setChatMessages(formattedMessages);
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'historique:", error);
+      }
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!chatOpen || !conversationId) return;
+
+    fetchHistory(); // Fetch on open
+    const intervalId = setInterval(fetchHistory, 5000); // Poll toutes les 5 secondes
+
+    return () => clearInterval(intervalId);
+  }, [chatOpen, conversationId, fetchHistory]);
 
   const handleSendMessage = async () => {
     if (!chatMessage.trim()) return;
@@ -35,13 +80,14 @@ const ChatWidget = () => {
       }
     }
     
+    // Affichage optimiste du message de l'utilisateur
     const newMessage: ChatMessage = {
       sender: 'user',
       text: chatMessage,
       time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
     };
-    
     setChatMessages(prev => [...prev, newMessage]);
+
     const messageToSend = chatMessage;
     setChatMessage("");
     
@@ -65,7 +111,9 @@ const ChatWidget = () => {
 
       // Récupérer l'ID de conversation si c'est le premier message
       if (!conversationId && response.data?.data?.conversationId) {
-        setConversationId(response.data.data.conversationId);
+        const newId = response.data.data.conversationId;
+        setConversationId(newId);
+        localStorage.setItem(CHAT_CONVERSATION_ID_KEY, newId);
       }
 
       if (!user && !userInfoCollected) {
@@ -74,54 +122,17 @@ const ChatWidget = () => {
       
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
+      // En cas d'erreur, on peut retirer le message optimiste pour ne pas induire en erreur
+      setChatMessages(prev => prev.filter(msg => msg.text !== newMessage.text || msg.time !== newMessage.time));
+      // Optionnel: toast.error("Votre message n'a pas pu être envoyé.");
     }
-    
-    // Simulate typing indicator
-    setIsTyping(true);
-    
-    // Simulate support response
-    setTimeout(() => {
-      setIsTyping(false);
-      const supportResponse: ChatMessage = {
-        sender: 'support',
-        text: getAutoResponse(messageToSend),
-        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setChatMessages(prev => [...prev, supportResponse]);
-    }, 1500);
   };
 
   const handleQuickMessage = (message: string) => {
     setChatMessage(message);
     setTimeout(() => {
       handleSendMessage();
-    }, 100);
-  };
-
-  const getAutoResponse = (userMessage: string): string => {
-    const message = userMessage.toLowerCase();
-    
-    if (message.includes('produit') || message.includes('catalogue')) {
-      return "Nous avons une large gamme de produits électriques : câbles, disjoncteurs, prises, éclairage, etc. Consultez notre catalogue en ligne ou contactez-nous pour plus d'informations spécifiques.";
-    }
-    
-    if (message.includes('devis') || message.includes('prix')) {
-      return "Pour un devis personnalisé, merci de nous fournir la liste des produits souhaités et les quantités. Nous vous répondrons dans les plus brefs délais avec nos meilleurs tarifs.";
-    }
-    
-    if (message.includes('technique') || message.includes('aide') || message.includes('support')) {
-      return "Notre équipe technique est là pour vous aider ! Décrivez-nous votre problème en détail et nous vous fournirons une solution adaptée.";
-    }
-    
-    if (message.includes('livraison') || message.includes('délai')) {
-      return "Nous livrons à Conakry sous 24-48h et en province sous 3-5 jours selon la disponibilité des produits. Les frais de livraison varient selon la destination.";
-    }
-    
-    if (message.includes('horaire') || message.includes('ouvert')) {
-      return "Nous sommes ouverts du lundi au samedi de 8h à 18h. Notre équipe est disponible pour vous accueillir et répondre à vos questions.";
-    }
-    
-    return "Merci pour votre message ! Un de nos conseillers va vous répondre rapidement. En attendant, n'hésitez pas à consulter notre FAQ ou à nous appeler au +224 625 14 74 22.";
+    }, 100); // Un petit délai pour que l'état se mette à jour avant l'envoi
   };
 
   return (
@@ -133,19 +144,13 @@ const ChatWidget = () => {
           className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center group"
         >
           {chatOpen ? (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-8 h-8 transition-transform duration-300 group-hover:rotate-90" />
           ) : (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+            <MessageSquare className="w-8 h-8 transition-transform duration-300 group-hover:-rotate-12" />
           )}
-          
-          {/* Notification Badge */}
-          <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-            💬
-          </div>
+          {/* Modern Notification Badge */}
+          <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-ping"></div>
+          <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div>
         </button>
 
         {/* Chat Window */}
@@ -195,28 +200,6 @@ const ChatWidget = () => {
                   </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleQuickMessage("Je cherche des informations sur vos produits")}
-                    className="px-3 py-2 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-colors"
-                  >
-                    📦 Nos produits
-                  </button>
-                  <button
-                    onClick={() => handleQuickMessage("J'aimerais avoir un devis")}
-                    className="px-3 py-2 bg-green-100 text-green-700 rounded-full text-sm hover:bg-green-200 transition-colors"
-                  >
-                    💰 Devis
-                  </button>
-                  <button
-                    onClick={() => handleQuickMessage("J'ai besoin d'aide technique")}
-                    className="px-3 py-2 bg-orange-100 text-orange-700 rounded-full text-sm hover:bg-orange-200 transition-colors"
-                  >
-                    🔧 Support
-                  </button>
-                </div>
-
                 {/* User Messages */}
                 {chatMessages.map((message, index) => (
                   <div key={index} className={`flex ${message.sender === 'user' ? 'justify-end' : 'items-start gap-3'}`}>
@@ -242,23 +225,7 @@ const ChatWidget = () => {
                   </div>
                 ))}
 
-                {/* Typing Indicator */}
-                {isTyping && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                      </svg>
-                    </div>
-                    <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <div ref={chatMessagesEndRef} />
               </div>
             </div>
 

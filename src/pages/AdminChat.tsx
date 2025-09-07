@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "../api/axios";
 
 interface ChatMessage {
@@ -27,6 +27,7 @@ interface ChatMessage {
 
 interface Conversation {
   _id: string;
+  isGuest: boolean;
   lastMessage: ChatMessage;
   messageCount: number;
   unreadCount: number;
@@ -48,7 +49,7 @@ interface ChatStats {
 
 const AdminChat = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [replyMessage, setReplyMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -69,8 +70,7 @@ const AdminChat = () => {
   const loadConversations = async () => {
     try {
       setLoading(true);
-      const endpoint = filter === 'unread' ? '/api/chat/unread' : '/api/chat/conversations';
-      const response = await axios.get(endpoint);
+      const response = await axios.get('/api/chat/conversations');
       setConversations(response.data.data);
     } catch (error) {
       console.error('Erreur lors du chargement des conversations:', error);
@@ -80,14 +80,18 @@ const AdminChat = () => {
   };
 
   // Charger l'historique d'une conversation
-  const loadConversationHistory = async (conversationId: string) => {
+  const loadConversationHistory = async (conversation: Conversation) => {
+    if (!conversation) return;
     try {
-      const response = await axios.get(`/api/chat/conversation/${conversationId}`);
+      const { _id: groupId, isGuest } = conversation;
+      const response = await axios.get(`/api/chat/conversation/${groupId}`, {
+        params: { isGuest }
+      });
       setMessages(response.data.data);
-      setSelectedConversation(conversationId);
+      setSelectedConversation(conversation);
       
       // Marquer comme lu
-      await axios.patch(`/api/chat/conversation/${conversationId}/read`);
+      await axios.patch(`/api/chat/conversation/${groupId}/read`, null, { params: { isGuest } });
       
       // Recharger les conversations pour mettre à jour le compteur
       loadConversations();
@@ -102,8 +106,9 @@ const AdminChat = () => {
     if (!replyMessage.trim() || !selectedConversation) return;
     
     try {
+      const conversationIdToReply = selectedConversation.lastMessage.conversationId;
       await axios.post('/api/chat/reply', {
-        conversationId: selectedConversation,
+        conversationId: conversationIdToReply,
         message: replyMessage
       });
       
@@ -118,19 +123,22 @@ const AdminChat = () => {
   useEffect(() => {
     loadStats();
     loadConversations();
-  }, [filter]);
+  }, []);
 
   // Auto-refresh toutes les 30 secondes
   useEffect(() => {
     const interval = setInterval(() => {
       loadStats();
-      if (filter === 'unread') {
-        loadConversations();
-      }
+      loadConversations();
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [filter]);
+  }, []);
+
+  const filteredConversations = useMemo(() => {
+    if (filter === 'unread') return conversations.filter(c => c.unreadCount > 0);
+    return conversations;
+  }, [conversations, filter]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -268,12 +276,12 @@ const AdminChat = () => {
                     Aucune conversation trouvée
                   </div>
                 ) : (
-                  conversations.map((conversation) => (
+                  filteredConversations.map((conversation) => (
                     <div
                       key={conversation._id}
-                      onClick={() => loadConversationHistory(conversation._id)}
+                      onClick={() => loadConversationHistory(conversation)}
                       className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                        selectedConversation === conversation._id ? 'bg-blue-50 border-blue-200' : ''
+                        selectedConversation?._id === conversation._id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
                       }`}
                     >
                       <div className="flex items-start justify-between">
@@ -321,17 +329,17 @@ const AdminChat = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                          Conversation avec {messages[0]?.userInfo.nom}
+                          Conversation avec {selectedConversation.userInfo.nom}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {messages[0]?.userInfo.email}
-                          {messages[0]?.userInfo.telephone && (
-                            <span className="ml-2">• {messages[0].userInfo.telephone}</span>
+                          {selectedConversation.userInfo.email}
+                          {selectedConversation.userInfo.telephone && (
+                            <span className="ml-2">• {selectedConversation.userInfo.telephone}</span>
                           )}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        {messages[0]?.userInfo.isAuthenticated ? (
+                        {selectedConversation.userInfo.isAuthenticated ? (
                           <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                             ✅ Connecté
                           </span>

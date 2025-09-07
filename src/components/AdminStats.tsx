@@ -1,11 +1,12 @@
 import React from 'react';
+import { DollarSign, ShoppingBag, UserCheck, Package, TrendingUp, BarChart3 } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
   value: string | number;
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
 }
 
@@ -31,11 +32,11 @@ const StatCard: React.FC<StatCardProps> = ({
   const getChangeIcon = () => {
     switch (changeType) {
       case 'positive':
-        return '↗️';
+        return <TrendingUp className="w-3 h-3" />;
       case 'negative':
-        return '↘️';
+        return <TrendingUp className="w-3 h-3 rotate-180" />;
       default:
-        return '→';
+        return <TrendingUp className="w-3 h-3 rotate-90" />;
     }
   };
 
@@ -47,15 +48,15 @@ const StatCard: React.FC<StatCardProps> = ({
           <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
           {change && (
             <div className="mt-2 flex items-center">
-              <span className={`text-sm font-medium ${getChangeColor()}`}>
-                {getChangeIcon()} {change}
+              <span className={`text-sm font-medium ${getChangeColor()} flex items-center`}>
+                {getChangeIcon()} <span className="ml-1">{change}</span>
               </span>
             </div>
           )}
         </div>
         <div className="flex-shrink-0">
           <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-            <span className="text-2xl">{icon}</span>
+            <icon className="w-6 h-6 text-gray-600" />
           </div>
         </div>
       </div>
@@ -79,7 +80,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ stats }) => {
       value: `${stats.sales.toLocaleString()} €`,
       change: '+12.5%',
       changeType: 'positive' as const,
-      icon: '💰',
+      icon: DollarSign,
       color: 'hover:bg-blue-50 transition-colors'
     },
     {
@@ -87,7 +88,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ stats }) => {
       value: stats.orders,
       change: '+8.2%',
       changeType: 'positive' as const,
-      icon: '📋',
+      icon: ShoppingBag,
       color: 'hover:bg-green-50 transition-colors'
     },
     {
@@ -95,7 +96,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ stats }) => {
       value: stats.users,
       change: '+15.3%',
       changeType: 'positive' as const,
-      icon: '👥',
+      icon: UserCheck,
       color: 'hover:bg-purple-50 transition-colors'
     },
     {
@@ -103,15 +104,16 @@ const AdminStats: React.FC<AdminStatsProps> = ({ stats }) => {
       value: stats.products,
       change: '+5.7%',
       changeType: 'positive' as const,
-      icon: '📦',
+      icon: Package,
       color: 'hover:bg-orange-50 transition-colors'
     }
   ];
 
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        📊 Statistiques Rapides
+      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <BarChart3 className="w-5 h-5 mr-2" />
+        Statistiques Rapides
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((card, index) => (

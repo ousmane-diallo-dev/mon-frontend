@@ -19,11 +19,11 @@ interface SidebarProps {
   onClose: () => void;
   navLinks: NavLink[];
   user: User | null;
-  handleLogout: () => void;
+  onRequestLogoutConfirm: () => void;
   isLoggingOut: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, navLinks, user, handleLogout, isLoggingOut }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, navLinks, user, onRequestLogoutConfirm, isLoggingOut }) => {
   const navigate = useNavigate();
 
   const handleLinkClick = (path: string) => {
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, navLinks, user, hand
               </div>
               <button
                 onClick={() => {
-                  handleLogout();
+                  onRequestLogoutConfirm();
                   onClose();
                 }}
                 disabled={isLoggingOut}

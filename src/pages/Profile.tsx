@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import Loader from '../components/Loader';
 import { toast } from 'react-toastify';
 import { meProfile, updateMeProfile, uploadProfilePhoto, getOrders as getOrdersApi } from '../api/axios';
+import ConfirmLogoutModal from '../components/ConfirmLogoutModal';
 import { formatPrice } from '../utils/formatPrice';
 
 interface ProfileData {
@@ -65,6 +66,7 @@ const Profile: React.FC = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -660,6 +662,11 @@ const Profile: React.FC = () => {
           </div>
         </div>
       </div>
+      <ConfirmLogoutModal
+        open={confirmLogoutOpen}
+        onClose={() => setConfirmLogoutOpen(false)}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 };

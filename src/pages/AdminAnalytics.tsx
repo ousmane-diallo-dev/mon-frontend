@@ -29,7 +29,7 @@ const AdminAnalytics = () => {
     categoryStats: []
   });
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
-  const [activeChart, setActiveChart] = useState('sales');
+  const [activeChart, setActiveChart] = useState<'sales' | 'users'>('sales');
 
   useEffect(() => {
     loadAnalytics();
@@ -52,8 +52,11 @@ const AdminAnalytics = () => {
 
       // Calculs des métriques
       const totalSales = orders.reduce((sum: number, o: any) => sum + (o.montantTotal || 0), 0);
-      
-      // Données par mois (simulées pour la démo)
+      const totalOrders = orders.length;
+      const totalUsers = users.length;
+      const totalProducts = products.length;
+
+      // Données par mois (démo)
       const salesByMonth = [
         { month: 'Jan', sales: Math.round(totalSales * 0.15) },
         { month: 'Fév', sales: Math.round(totalSales * 0.12) },
@@ -63,14 +66,14 @@ const AdminAnalytics = () => {
         { month: 'Jun', sales: Math.round(totalSales * 0.25) }
       ];
 
-      // Top produits (simulé)
+      // Top produits (démo)
       const topProducts = products.slice(0, 5).map((p: any, i: number) => ({
         name: p.nom,
         sales: Math.round(totalSales * (0.2 - i * 0.03)),
         quantity: Math.round(50 - i * 8)
       }));
 
-      // Croissance utilisateurs
+      // Croissance utilisateurs (démo)
       const userGrowth = [
         { month: 'Jan', users: Math.round(users.length * 0.6) },
         { month: 'Fév', users: Math.round(users.length * 0.7) },
@@ -86,15 +89,15 @@ const AdminAnalytics = () => {
         return {
           name: cat.nom,
           products: catProducts.length,
-          sales: Math.round(totalSales * (catProducts.length / products.length))
+          sales: totalProducts > 0 ? Math.round(totalSales * (catProducts.length / totalProducts)) : 0
         };
       });
 
       setAnalytics({
         totalSales,
-        totalOrders: orders.length,
-        totalUsers: users.length,
-        totalProducts: products.length,
+        totalOrders,
+        totalUsers,
+        totalProducts,
         salesByMonth,
         topProducts,
         userGrowth,
@@ -134,7 +137,7 @@ const AdminAnalytics = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('Rapport CSV généré avec succès !');
+      toast.success('Rapport CSV généré');
     } else {
       toast.info('Export PDF en cours de développement');
     }
@@ -142,294 +145,135 @@ const AdminAnalytics = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des analyses...</p>
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">Chargement des analyses…</p>
         </div>
       </div>
     );
   }
 
+  const chartData = activeChart === 'sales' ? analytics.salesByMonth : analytics.userGrowth;
+  const chartMax = Math.max(...(activeChart === 'sales' ? analytics.salesByMonth.map(s => s.sales) : analytics.userGrowth.map(u => u.users)), 1);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-2xl shadow-xl p-8 mb-8 text-white mx-6 mt-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-3 rounded-xl mr-4 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div>
-              <div className="flex items-center mb-2">
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 mr-4">
-                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h1 className="text-3xl font-bold">Analyses & Rapports</h1>
-              </div>
-              <p className="text-blue-100 text-lg">
-                Tableaux de bord et métriques détaillées de performance
-              </p>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Analyses & Rapports</h1>
+            <p className="text-sm text-gray-600">Indicateurs clés et tendances</p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap gap-2">
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 text-sm"
             >
-              <option value="7d" className="text-gray-900">7 derniers jours</option>
-              <option value="30d" className="text-gray-900">30 derniers jours</option>
-              <option value="90d" className="text-gray-900">3 derniers mois</option>
-              <option value="1y" className="text-gray-900">1 an</option>
+              <option value="7d">7 derniers jours</option>
+              <option value="30d">30 derniers jours</option>
+              <option value="90d">3 derniers mois</option>
+              <option value="1y">1 an</option>
             </select>
             <button
               onClick={() => exportReport('csv')}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span>Exporter</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 pb-8">
-        {/* Métriques principales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Chiffre d'Affaires</p>
-                <p className="text-3xl font-bold text-blue-600">{formatPrice(analytics.totalSales)}</p>
-                <p className="text-xs text-green-500 flex items-center mt-1">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                  +12.5% vs période précédente
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">💰</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-green-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Commandes</p>
-                <p className="text-3xl font-bold text-green-600">{analytics.totalOrders}</p>
-                <p className="text-xs text-green-500 flex items-center mt-1">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                  +8.3% vs période précédente
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">📦</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-purple-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Utilisateurs</p>
-                <p className="text-3xl font-bold text-purple-600">{analytics.totalUsers}</p>
-                <p className="text-xs text-green-500 flex items-center mt-1">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                  +15.7% vs période précédente
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">👥</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-orange-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Produits</p>
-                <p className="text-3xl font-bold text-orange-600">{analytics.totalProducts}</p>
-                <p className="text-xs text-green-500 flex items-center mt-1">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                  +5.2% vs période précédente
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">📋</span>
-              </div>
-            </div>
+              className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+            >Exporter CSV</button>
           </div>
         </div>
 
-        {/* Graphiques */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Graphique des ventes */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                  <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Évolution des Ventes
-                </h3>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setActiveChart('sales')}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                      activeChart === 'sales' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    Ventes
-                  </button>
-                  <button
-                    onClick={() => setActiveChart('users')}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                      activeChart === 'users' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    Utilisateurs
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="h-64 flex items-end justify-between space-x-2">
-                {(activeChart === 'sales' ? analytics.salesByMonth : analytics.userGrowth).map((item, index) => {
-                  const maxValue = Math.max(...(activeChart === 'sales' ? analytics.salesByMonth.map(s => s.sales) : analytics.userGrowth.map(u => u.users)));
-                  const height = ((activeChart === 'sales' ? item.sales : (item as any).users) / maxValue) * 200;
-                  const color = activeChart === 'sales' ? 'bg-gradient-to-t from-blue-400 to-blue-600' : 'bg-gradient-to-t from-purple-400 to-purple-600';
-                  
-                  return (
-                    <div key={index} className="flex-1 flex flex-col items-center">
-                      <div 
-                        className={`w-full ${color} rounded-t-lg transition-all duration-500 hover:opacity-80 cursor-pointer`}
-                        style={{ height: `${height}px` }}
-                        title={`${item.month}: ${activeChart === 'sales' ? formatPrice(item.sales) : (item as any).users + ' utilisateurs'}`}
-                      ></div>
-                      <p className="text-xs text-gray-600 mt-2 font-medium">{item.month}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-sm text-gray-500">Chiffre d'affaires</p>
+            <p className="text-2xl font-bold text-gray-900">{formatPrice(analytics.totalSales)}</p>
           </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-sm text-gray-500">Commandes</p>
+            <p className="text-2xl font-bold text-gray-900">{analytics.totalOrders}</p>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-sm text-gray-500">Utilisateurs</p>
+            <p className="text-2xl font-bold text-gray-900">{analytics.totalUsers}</p>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-sm text-gray-500">Produits</p>
+            <p className="text-2xl font-bold text-gray-900">{analytics.totalProducts}</p>
+          </div>
+        </div>
 
-          {/* Top produits */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                </svg>
-                Top Produits
-              </h3>
+        {/* Charts + Top products */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Chart */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">{activeChart === 'sales' ? 'Évolution des ventes' : 'Évolution des utilisateurs'}</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActiveChart('sales')}
+                  className={`px-3 py-1.5 rounded-lg text-sm border ${activeChart === 'sales' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-white text-gray-700 border-gray-200'}`}
+                >Ventes</button>
+                <button
+                  onClick={() => setActiveChart('users')}
+                  className={`px-3 py-1.5 rounded-lg text-sm border ${activeChart === 'users' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-white text-gray-700 border-gray-200'}`}
+                >Utilisateurs</button>
+              </div>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {analytics.topProducts.map((product, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                        index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                        index === 1 ? 'bg-gradient-to-r from-gray-400 to-gray-600' :
-                        index === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-600' :
-                        'bg-gradient-to-r from-blue-400 to-blue-600'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{product.name}</p>
-                        <p className="text-sm text-gray-500">{product.quantity} ventes</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">{formatPrice(product.sales)}</p>
-                      <p className="text-xs text-green-500">+{Math.round((5-index) * 2)}%</p>
-                    </div>
+            <div className="h-64 flex items-end justify-between gap-2">
+              {chartData.map((item: any, idx: number) => {
+                const value = activeChart === 'sales' ? item.sales : item.users;
+                const height = (value / chartMax) * 200;
+                const color = activeChart === 'sales' ? 'bg-blue-500' : 'bg-purple-500';
+                return (
+                  <div key={idx} className="flex-1 flex flex-col items-center">
+                    <div className={`w-full ${color} rounded-t-md transition-all duration-300`} style={{ height: `${height}px` }} />
+                    <p className="text-xs text-gray-600 mt-2 font-medium">{item.month}</p>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
-        </div>
 
-        {/* Statistiques par catégorie */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center">
-              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
-              </svg>
-              Performance par Catégorie
-            </h3>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {analytics.categoryStats.map((category, index) => (
-                <div key={index} className="bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-gray-900 text-lg">{category.name}</h4>
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      index % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-                      index % 4 === 1 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                      index % 4 === 2 ? 'bg-gradient-to-r from-purple-400 to-purple-600' :
-                      'bg-gradient-to-r from-orange-400 to-orange-600'
-                    }`}>
-                      <span className="text-white text-xl">
-                        {index % 4 === 0 ? '📱' : index % 4 === 1 ? '💻' : index % 4 === 2 ? '🎧' : '📺'}
-                      </span>
-                    </div>
+          {/* Top products */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <h3 className="font-semibold text-gray-900 mb-4">Top produits</h3>
+            <div className="space-y-3">
+              {analytics.topProducts.map((product, index) => (
+                <div key={index} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50">
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs text-gray-600">{product.quantity} ventes</p>
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Produits</span>
-                      <span className="font-bold text-gray-900">{category.products}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Ventes</span>
-                      <span className="font-bold text-green-600">{formatPrice(category.sales)}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${
-                          index % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-                          index % 4 === 1 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                          index % 4 === 2 ? 'bg-gradient-to-r from-purple-400 to-purple-600' :
-                          'bg-gradient-to-r from-orange-400 to-orange-600'
-                        }`}
-                        style={{ width: `${(category.sales / analytics.totalSales) * 100}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {((category.sales / analytics.totalSales) * 100).toFixed(1)}% du total
-                    </p>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">{formatPrice(product.sales)}</p>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Category performance */}
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <h3 className="font-semibold text-gray-900 mb-4">Performance par catégorie</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {analytics.categoryStats.map((category, index) => (
+              <div key={index} className="p-4 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-medium text-gray-900 truncate">{category.name}</p>
+                  <span className="text-xs text-gray-500">{category.products} produits</span>
+                </div>
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-gray-600">Ventes</span>
+                  <span className="font-semibold text-gray-900">{formatPrice(category.sales)}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className={`h-2 rounded-full bg-blue-500`} style={{ width: `${analytics.totalSales ? (category.sales / analytics.totalSales) * 100 : 0}%` }} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

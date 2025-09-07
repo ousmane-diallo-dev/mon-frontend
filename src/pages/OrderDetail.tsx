@@ -42,21 +42,6 @@ const OrderDetail: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Commande #{String(order._id).slice(-8).toUpperCase()}</h1>
         <div className="flex gap-2">
-          <button
-            onClick={() => {
-              const invoice = {
-                id: `FA-${String(order._id).slice(-8).toUpperCase()}`,
-                date: new Date(order.createdAt || Date.now()).toLocaleDateString(),
-                customer: { name: order.utilisateur?.nom || 'Client', email: order.utilisateur?.email || '' },
-                items: (order.produits || []).map((it: any) => ({ nom: it.produit?.nom, quantite: it.quantite, prix: it.prixUnitaire })),
-                total: order.montantTotal || 0,
-              };
-              navigate('/invoice', { state: { invoice } });
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Voir la facture
-          </button>
           <button onClick={() => navigate('/orders')} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Mes commandes</button>
         </div>
       </div>

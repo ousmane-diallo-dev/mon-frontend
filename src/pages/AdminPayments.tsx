@@ -201,11 +201,11 @@ const AdminPayments: React.FC = () => {
           <div className="block md:hidden">
             <div className="p-4 space-y-4">
               {filtered.map((p) => (
-                <div key={p._id} className="bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                <div key={p._id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-lg transition-all duration-300">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -214,7 +214,7 @@ const AdminPayments: React.FC = () => {
                         <p className="text-sm text-gray-500">{formatDate(p.createdAt)}</p>
                       </div>
                     </div>
-                    <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-full shadow-sm ${
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       p.statut === 'validé' ? 'bg-green-100 text-green-800 border border-green-200' :
                       p.statut === 'échoué' ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                     }`}>
@@ -224,38 +224,32 @@ const AdminPayments: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-blue-50 rounded-lg p-3">
+                    <div className="bg-blue-50 rounded-lg p-2 text-center">
                       <p className="text-xs font-medium text-blue-600 mb-1">Client</p>
                       <p className="font-semibold text-gray-900">{p.commande?.client?.nom || 'Client'}</p>
-                      <p className="text-xs text-gray-500">{p.commande?.client?.email || ''}</p>
+                      <p className="text-xs text-gray-500 truncate">{p.commande?.client?.email || ''}</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg p-3">
+                    <div className="bg-green-50 rounded-lg p-2 text-center">
                       <p className="text-xs font-medium text-green-600 mb-1">Montant</p>
-                      <p className="font-bold text-lg text-gray-900">{formatPrice(p.montant || 0)}</p>
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <p className="font-bold text-base text-gray-900">{formatPrice(p.montant || 0)}</p>
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 capitalize mt-1">
                         {p.methode}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <button
+                    <button // Valider
                       onClick={() => updateStatus(p._id, 'validé')}
-                      className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
                     >
                       ✅ Valider
                     </button>
-                    <button
+                    <button // Échouer
                       onClick={() => updateStatus(p._id, 'échoué')}
-                      className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
                     >
                       ❌ Échouer
-                    </button>
-                    <button
-                      onClick={() => updateStatus(p._id, 'en attente')}
-                      className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                    >
-                      ⏳ Attente
                     </button>
                   </div>
                 </div>
@@ -266,7 +260,7 @@ const AdminPayments: React.FC = () => {
           {/* Vue desktop - Table améliorée */}
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
@@ -307,22 +301,22 @@ const AdminPayments: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filtered.map((p, index) => (
-                  <tr key={p._id} className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <tr key={p._id} className="hover:bg-gray-50 transition-colors duration-200">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                           </svg>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{formatDate(p.createdAt)}</p>
-                          <p className="text-xs text-gray-500">Paiement</p>
+                          <p className="text-xs text-gray-500">ID: {p._id.slice(-8)}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
                         <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
                         </svg>
@@ -331,8 +325,8 @@ const AdminPayments: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-gray-700 font-bold text-xs">
                             {(p.commande?.client?.nom || 'C').charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -343,20 +337,15 @@ const AdminPayments: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">{formatPrice(p.montant || 0)}</p>
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {p.methode}
-                        </span>
-                      </div>
+                      <p className="text-sm font-semibold text-gray-900">{formatPrice(p.montant || 0)}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
                         {p.methode}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full shadow-sm ${
+                      <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${
                         p.statut === 'validé' ? 'bg-green-100 text-green-800 border border-green-200' :
                         p.statut === 'échoué' ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                       }`}>
@@ -387,22 +376,22 @@ const AdminPayments: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => updateStatus(p._id, 'validé')}
-                          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 text-xs font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          onClick={() => updateStatus(p._id, 'validé')} title="Valider"
+                          className="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50"
                         >
-                          ✅
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </button>
                         <button
-                          onClick={() => updateStatus(p._id, 'échoué')}
-                          className="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-xs font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          onClick={() => updateStatus(p._id, 'échoué')} title="Échouer"
+                          className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50"
                         >
-                          ❌
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </button>
                         <button
-                          onClick={() => updateStatus(p._id, 'en attente')}
-                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-3 py-2 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 text-xs font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          onClick={() => updateStatus(p._id, 'en attente')} title="Mettre en attente"
+                          className="text-yellow-600 hover:text-yellow-900 p-2 rounded-lg hover:bg-yellow-50"
                         >
-                          ⏳
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </button>
                       </div>
                     </td>
