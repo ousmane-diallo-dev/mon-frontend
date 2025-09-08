@@ -1,8 +1,10 @@
+/**
+ * Configuration centralisée pour l'API.
+ * Utilise les variables d'environnement pour plus de flexibilité.
+ */
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+
 export const API_CONFIG = {
-  // Utilise la variable Vite en priorité (configurée dans .env / .env.production), sinon fallback localhost
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_URL,
 };

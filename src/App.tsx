@@ -11,6 +11,7 @@ import { useGlobalScrollToTop } from "./utils/scrollToTop";
 // Pages publiques
 import HomePage from "./pages/HomePage";
 import ProductList from "./pages/ProductList";
+import ConditionalHome from "./components/ConditionalHome";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryList from "./pages/CategoryList";
 import About from "./pages/About";
@@ -59,7 +60,7 @@ const App = () => {
       <main className="flex-1 w-full p-0">
       <Routes>
         {/* 🌐 Routes publiques */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<ConditionalHome />} />
         <Route path="/products" element={<ProductList />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/category" element={<CategoryList />} />

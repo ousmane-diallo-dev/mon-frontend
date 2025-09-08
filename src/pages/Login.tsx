@@ -54,11 +54,21 @@ const Login: React.FC = () => {
       toast.success("Connexion réussie ! Bienvenue sur ElectroPro");
       navigate("/");
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Erreur lors de la connexion";
-      toast.error(errorMessage);
-      if (error.response?.status === 401) {
-        setErrors({ general: "Email ou mot de passe incorrect" });
+      let userMessage = "Une erreur inattendue est survenue.";
+      // Erreur réseau (serveur non démarré, mauvaise URL, etc.)
+      if (error.code === 'ERR_NETWORK') {
+        console.error("Erreur réseau détectée. Le backend est-il démarré sur le bon port (5001) ?");
+        userMessage = "Impossible de joindre le serveur. Veuillez vérifier votre connexion et réessayer.";
+        setErrors({ general: "Erreur réseau. Le serveur est injoignable." });
+      } 
+      // Erreur de l'API (ex: 401, 400, 500)
+      else if (error.response) {
+        userMessage = error.response.data?.message || "Email ou mot de passe incorrect.";
+        if (error.response.status === 401) {
+          setErrors({ general: "Email ou mot de passe incorrect." });
+        }
       }
+      toast.error(userMessage);
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Animations personnalisées */
+/* ===== ANIMATIONS PERSONNALISÉES OPTIMISÉES ===== */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
@@ -204,6 +204,57 @@
   }
 }
 
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heartbeat {
+  0%, 14%, 28%, 42%, 70% {
+    transform: scale(1);
+  }
+  7%, 21%, 35% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 /* Classes utilitaires pour les animations */
 .animate-float {
   animation: float 3s ease-in-out infinite;
@@ -228,6 +279,53 @@
 .animate-gradient-shift {
   animation: gradient-shift 3s ease infinite;
   background-size: 200% 200%;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.5s ease-out forwards;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+.animate-typewriter {
+  animation: typewriter 2s steps(40, end);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Animation delays */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animate-delay-500 {
+  animation-delay: 0.5s;
+}
+
+.animate-delay-700 {
+  animation-delay: 0.7s;
+}
+
+.animate-delay-1000 {
+  animation-delay: 1s;
 }
 
 /* Effets de glassmorphism */
